@@ -4,6 +4,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 import { CreateMovieDTO } from '../src/movies/dto/create-movie.dto';
+import { UpdateMovieDTO } from '../src/movies/dto/update-movie.dto';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
@@ -39,17 +40,31 @@ describe('AppController (e2e)', () => {
         .expect([]);
     });
 
-    it("POST", () => {
+    it("POST 201", () => {
       const data:CreateMovieDTO = {
           title: "Test",
           year: 2000,
           genres: []
-        };
+      };
 
       return request(app.getHttpServer())
         .post("/movies")
         .send(data)
         .expect(201);
+    });
+
+    it("POST 400", () => {
+      const data:object = {
+          title: "Wrong",
+          year: 2000,
+          genres: [],
+          other: "yeah"
+      };
+
+      return request(app.getHttpServer())
+        .post("/movies")
+        .send(data)
+        .expect(400);
     });
 
     it("DELETE", () => {
@@ -71,8 +86,23 @@ describe('AppController (e2e)', () => {
         .get("/movies/9999")
         .expect(404);
     });
-    // it("PATCH");
-    // it("DELETE");
+
+    it("PATCH", () => {
+      const data:UpdateMovieDTO = {
+        title: "Updated Test"
+      };
+
+      return request(app.getHttpServer())
+        .patch("/movies/1")
+        .send(data)
+        .expect(200);
+    })
+
+    it("DELETE", () => {
+      return request(app.getHttpServer())
+        .delete("/movies/1")
+        .expect(200);
+    });
   });
   
   afterAll(async () => {
